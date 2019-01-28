@@ -11,6 +11,7 @@ clc;
 % Carregando as imagens
 roll_img = imread('imgs/dice-rolls/dice-roll-test-1.png');
 result = [0 0 0 0 0];
+dice_count = [0 0 0 0 0 0];
 dice1 = imread('imgs/dice-values/dice-1.jpg');
 dice2 = imread('imgs/dice-values/dice-2.jpg');
 dice3 = imread('imgs/dice-values/dice-3.jpg');
@@ -20,7 +21,7 @@ dice6 = imread('imgs/dice-values/dice-6.jpg');
 
 % Mostrando a imagem original
 figure('Name','Roll (Original)'),set(gcf, 'Units','Normalized','OuterPosition',[0 0 1 1]),
-subplot(1,2,1),imshow(roll_img),title('Roll (Original)');
+imshow(roll_img),title('Roll (Original)');
 
 % Converte as imagens se necessário (mais de um canal de cores na imagem)
 [r1, c1, canais1] = size(roll_img);
@@ -39,13 +40,18 @@ bw_roll = imdilate(bw_roll, strel('sphere', 2));
 props1 = regionprops(rotulada1, 'EulerNumber', 'Centroid');
 
 % Mostrando a imagem com erosão e número de Euler
-subplot(1,2,2), imshow(bw_roll), title('Roll'),
+figure('Name','Roll (bw)'),set(gcf, 'Units','Normalized','OuterPosition',[0 0 1 1]),
+imshow(bw_roll), title('Roll (bw)');
+
+for k=1:qtd_regioes1
+    text(props1(k).Centroid(1) - 50, props1(k).Centroid(2) - 50, num2str(abs(props1(k).EulerNumber) + 1), 'FontSize', 14, 'FontWeight' , 'Bold', 'Color', 'Red', 'HorizontalAlignment', 'Center');
+end
 
 % Criando figura para exibir a jogada e mostrar outras informações
 figure('Name','Result'),set(gcf, 'Units','Normalized','OuterPosition',[0 0 1 1]);
-text(props1(3).Centroid(1), props1(3).Centroid(2) - , num2str(excen), 'FontSize', 14, 'FontWeight' , 'Bold', 'Color', 'Red', 'HorizontalAlignment', 'Center');
 for k=1:qtd_regioes1
     result(k) = abs(props1(k).EulerNumber) + 1; % vetor para armazenar valores dos d6 rolados
+    dice_count(result(k)) = dice_count(result(k)) + 1; % vetor para armazenar a contagem de cada valor rolado
     
     % If para exibir a jogada
     if result(k) == 1
@@ -62,3 +68,11 @@ for k=1:qtd_regioes1
         subplot(2,5,k+5),imshow(dice6),title('6');
     end
 end
+
+% Criando os objetos Hand
+jogador1 = Hand(dice_count);
+
+
+ax = subplot(2, 5, 5);
+text(0.5, 0.5, [jogador1.hand_type char(10) num2str(jogador1.hand_strength(1)) char(10) num2str(jogador1.extra_dice(1))], 'FontSize', 14, 'FontWeight' , 'Bold', 'Color', 'Red');
+set ( ax, 'visible', 'off');

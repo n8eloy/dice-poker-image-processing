@@ -18,6 +18,8 @@ classdef Hand
       function obj = Hand(dice_count)
           % Determinando qual foi a mão do jogador
             obj.hand_type = '';
+            obj.hand_strength = [0 0];
+            obj.extra_dice = [0 0 0 0 0]
             three = 0;
             pairs = [0 0];
             five_str = 0;
@@ -43,15 +45,15 @@ classdef Hand
 
                    if dice_count(k) == 5
                         obj.hand_type = 'Five-of-a-Kind'; % five-of-a-kind
-                        obj.hand_strength = [k];
+                        obj.hand_strength(1) = k;
                         obj.extra_dice = null;
                         break;
                    elseif dice_count(k) == 4
                         obj.hand_type = 'Four-of-a-Kind'; % four-of-a-kind
-                        obj.hand_strength = [k];
+                        obj.hand_strength(1) = k;
                    elseif dice_count(k) == 3
                        three = k;
-                       if pairs > 0
+                       if pairs(1) ~= 0
                            obj.hand_type = 'Full House'; % full house
                            obj.hand_strength = [k, pairs(1)];
                            break;
@@ -67,7 +69,7 @@ classdef Hand
                            obj.hand_type = 'Full House'; % full house
                            obj.hand_strength = [three, pairs(1)];
                            break;
-                       elseif pairs(1) ~= 0
+                       elseif pairs(2) ~= 0
                            obj.hand_type = 'Two Pairs'; % two pairs
                            obj.hand_strength = [pairs(1), pairs(2)];
                        end
@@ -76,23 +78,19 @@ classdef Hand
             end
            
             obj.extra_dice = sort(obj.extra_dice, 'descend'); % Ordenando os dados extra pela força
-            if pairs(2) ~= 0
-                obj.hand_strength = sort(obj.hand_strength, 'descend');
-            end
+            obj.hand_strength = sort(obj.hand_strength, 'descend');
             
             if strcmp(obj.hand_type, '') % Se a mão ainda não foi determinada no loop
                 if six_str == 1 % Six High Straight
                     obj.hand_type = 'Six High Straight';
-                    obj.hand_strength = null;
                 elseif five_str == 1 % Five High Straight
                     obj.hand_type = 'Five High Straight';
-                    obj.hand_strength = null;
                 elseif three ~= 0 % Three-of-a-Kind
                     obj.hand_type = 'Three-of-a-Kind';
-                    obj.hand_strength = [three];
+                    obj.hand_strength(1) = three;
                 elseif pairs(1) ~= 0 % Pair
                     obj.hand_type = 'Pair';
-                    obj.hand_strength = [pairs(1)];
+                    obj.hand_strength(1) = pairs(1);
                 else % Nothing
                     obj.hand_type = 'Nothing';
                     obj.hand_strength = obj.extra_dice;

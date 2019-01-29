@@ -9,7 +9,7 @@ close all;
 clc;
 
 % Carregando as imagens
-roll_img = imread('imgs/dice-rolls/dice-roll-test-1.png');
+roll_img = imread('imgs/dice-rolls/dice-roll-test-4.png');
 result = [0 0 0 0 0];
 dice_count = [0 0 0 0 0 0];
 dice1 = imread('imgs/dice-values/dice-1.jpg');
@@ -28,20 +28,39 @@ imshow(roll_img),title('Roll (Original)');
 if canais1 > 1 
     roll_img = rgb2gray(roll_img); 
 end
-roll_img = im2double(roll_img);
+%roll_img = im2double(roll_img);
 
-% Binariza as imagens
-bw_roll = imbinarize(roll_img,graythresh(roll_img));
-bw_roll = imdilate(bw_roll, strel('sphere', 2));
+% Binariza as imagens e as trata para reconhecer cada dado individualmente
+bw_roll = binarizeImg(roll_img, 1);
+
+% Erosão aplicada para eliminar as laterais dos dados
+bw_roll = imerode(bw_roll, strel('sphere', 3));
+
+% bw_roll_smaller guarda os dados com os pontos menores dentro deles
+bw_roll_smaller = ~bw_roll;
+bw_roll_smaller = imerode(bw_roll_smaller, strel('sphere', 5));
+bw_roll_smaller = ~bw_roll_smaller;
+
+% bw_roll_filled guarda os dados com os pontos preenchidos, precisamos
+% disso para fazer o tratamento final que divide os dados quando eles estão
+% muito juntos.
+bw_roll_filled = imfill(bw_roll, 'holes');
+bw_roll_filled = imerode(bw_roll_filled, strel('sphere', 4));
+
+% bw_roll_final é o resultado da operação lógica AND, com os dados
+% devidamente separados
+bw_roll_final = bw_roll_smaller & bw_roll_filled;
+
 % Label
-[rotulada1, qtd_regioes1] = bwlabel(bw_roll);
+[rotulada1, qtd_regioes1] = bwlabel(bw_roll_final);
 
 % Regionprops
-props1 = regionprops(rotulada1, 'EulerNumber', 'Centroid', 'BoundingBox');
+props1 = regionprops(rotulada1, 'EulerNumber', 'Centroid', 'BoundingBox', 'PixelIdxList');
 
-% Mostrando a imagem com erosão e número de Euler
-figure('Name','Roll (bw)'),set(gcf, 'Units','Normalized','OuterPosition',[0 0 1 1]),
-imshow(bw_roll), title('Roll (bw)');
+figure('Name','Roll (bw_roll)'),set(gcf, 'Units','Normalized','OuterPosition',[0 0 1 1]),
+subplot(1,3,1),imshow(bw_roll_smaller), title('Roll (smaller dots)');
+subplot(1,3,2),imshow(bw_roll_filled), title('Roll (filled dots and regions defined)');
+subplot(1,3,3),imshow(bw_roll_smaller&bw_roll_filled), title('Roll (AND operation)');
 
 for k=1:qtd_regioes1
     thisBB = props1(k).BoundingBox;
@@ -76,6 +95,6 @@ end
 jogador1 = Hand(dice_count);
 
 ax = subplot(2, 5, 2);
-text(0.5, 0.5, ['Tipo da Mão: ' jogador1.hand_type char(10) 'Força da mão: ' num2str(jogador1.hand_strength(1)) ', ' num2str(jogador1.hand_strength(2)) char(10) 'Dados extra: ' num2str(jogador1.extra_dice(1))],...
+text(0.5, 0.5, ['Tipo da Mão: ' jogador1.hand_type char(10) 'Força da mão: ' num2str(jogador1.hand_strength(1)) ', ' num2str(jogador1.hand_strength(2)) char(10) 'Dados extra: ' num2str(jogador1.extra_dice(1)) ', ' num2str(jogador1.extra_dice(2)) ', ' num2str(jogador1.extra_dice(3)) ', ' num2str(jogador1.extra_dice(4)) ', ' num2str(jogador1.extra_dice(5))],...
     'FontSize', 32, 'FontWeight' , 'Bold', 'Color', 'Red');
 set ( ax, 'visible', 'off');

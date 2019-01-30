@@ -9,7 +9,7 @@ close all;
 clc;
 
 % Carregando as imagens
-roll_img = imread('imgs/dice-rolls/dice-roll-test-4.png');
+roll_img = imread('imgs/dice-rolls/dice-roll-11.jpg');
 result = [0 0 0 0 0];
 dice_count = [0 0 0 0 0 0];
 dice1 = imread('imgs/dice-values/dice-1.jpg');
@@ -30,39 +30,26 @@ if canais1 > 1
 end
 %roll_img = im2double(roll_img);
 
+% Aplicando o filtro da mediana para eliminar ruídos
+% roll_img_smooth = medfilt2(roll_img);
+
 % Binariza as imagens e as trata para reconhecer cada dado individualmente
-bw_roll = binarize
+bw_roll = binarizeImg(roll_img, 120); % segundo argumento é o limiar.
 
-% Erosão aplicada para eliminar as laterais dos dados
-bw_roll = imerode(bw_roll, strel('sphere', 3));
-
-% bw_roll_smaller guarda os dados com os pontos menores dentro deles
-bw_roll_smaller = ~bw_roll;
-bw_roll_smaller = imerode(bw_roll_smaller, strel('sphere', 5));
-bw_roll_smaller = ~bw_roll_smaller;
-
-% bw_roll_filled guarda os dados com os pontos preenchidos, precisamos
-% disso para fazer o tratamento final que divide os dados quando eles estão
-% muito juntos.
-bw_roll_filled = imfill(bw_roll, 'holes');
-bw_roll_filled = imerode(bw_roll_filled, strel('sphere', 4));
-
-% bw_roll_final é o resultado da operação lógica AND, com os dados
-% devidamente separados
-bw_roll_final = bw_roll_smaller & bw_roll_filled;
-
-% Label
-[rotulada1, qtd_regioes1] = bwlabel(bw_roll_final);
+[rotulada1, qtd_regioes1, bw_roll_eroded, bw_roll_smaller, bw_roll_filled, bw_roll_final] = isolateDices(bw_roll, 3);
+% o segundo argumento é o raio da sphere utilizada na primeira erosão.
+% Aumente ou diminua caso não tenha o resultado esperado, normalmente será
+% um valor entre 3 e 10, dependendo do reflexo/sujeira após a binarização
 
 % Regionprops
 props1 = regionprops(rotulada1, 'EulerNumber', 'Centroid', 'BoundingBox', 'PixelIdxList');
 
-
-% Mostrando a imagem com erosão e número de Euler
 figure('Name','Roll (bw_roll)'),set(gcf, 'Units','Normalized','OuterPosition',[0 0 1 1]),
-subplot(1,3,1),imshow(bw_roll_smaller), title('Roll (smaller dots)');
-subplot(1,3,2),imshow(bw_roll_filled), title('Roll (filled dots and regions defined)');
-subplot(1,3,3),imshow(bw_roll_smaller&bw_roll_filled), title('Roll (AND operation)');
+subplot(1,5,1),imshow(bw_roll), title('Roll (bw)');
+subplot(1,5,2),imshow(bw_roll_eroded), title('Roll (eroded)');
+subplot(1,5,3),imshow(bw_roll_smaller), title('Roll (smaller dots)');
+subplot(1,5,4),imshow(bw_roll_filled), title('Roll (filled dots and regions defined)');
+subplot(1,5,5),imshow(bw_roll_final), title('Roll (AND operation)');
 
 for k=1:qtd_regioes1
     thisBB = props1(k).BoundingBox;

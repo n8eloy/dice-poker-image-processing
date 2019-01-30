@@ -46,7 +46,6 @@ classdef Hand
                    if dice_count(k) == 5
                         obj.hand_type = 'Five-of-a-Kind'; % five-of-a-kind
                         obj.hand_strength(1) = k;
-                        obj.extra_dice = null;
                         break;
                    elseif dice_count(k) == 4
                         obj.hand_type = 'Four-of-a-Kind'; % four-of-a-kind
@@ -83,8 +82,10 @@ classdef Hand
             if strcmp(obj.hand_type, '') % Se a mão ainda não foi determinada no loop
                 if six_str == 1 % Six High Straight
                     obj.hand_type = 'Six High Straight';
+                    obj.extra_dice = [0 0 0 0 0];
                 elseif five_str == 1 % Five High Straight
                     obj.hand_type = 'Five High Straight';
+                    obj.extra_dice = [0 0 0 0 0];
                 elseif three ~= 0 % Three-of-a-Kind
                     obj.hand_type = 'Three-of-a-Kind';
                     obj.hand_strength(1) = three;

@@ -1,5 +1,6 @@
 classdef Hand
    properties
+      hand_rank % ranking da mão, baseado no hand_type
       hand_type % tipo da mão (Pair, Two Pairs, Three-of-a-kind etc...)
       hand_strength % força da mão (vetor que guarda o valor dos dados da mão
                     % forem [2 2 4 4 5 1], o hand_type será Two Pairs a e a
@@ -46,15 +47,18 @@ classdef Hand
                    if dice_count(k) == 5
                         obj.hand_type = 'Five-of-a-Kind'; % five-of-a-kind
                         obj.hand_strength(1) = k;
+                        obj.hand_rank = 8;
                         break;
                    elseif dice_count(k) == 4
                         obj.hand_type = 'Four-of-a-Kind'; % four-of-a-kind
                         obj.hand_strength(1) = k;
+                        obj.hand_rank = 7;
                    elseif dice_count(k) == 3
                        three = k;
                        if pairs(1) ~= 0
                            obj.hand_type = 'Full House'; % full house
                            obj.hand_strength = [k, pairs(1)];
+                           obj.hand_rank = 6;
                            break;
                        end
                    elseif dice_count(k) == 2
@@ -67,10 +71,12 @@ classdef Hand
                        if three ~= 0
                            obj.hand_type = 'Full House'; % full house
                            obj.hand_strength = [three, pairs(1)];
+                           obj.hand_rank = 6;
                            break;
                        elseif pairs(2) ~= 0
                            obj.hand_type = 'Two Pairs'; % two pairs
                            obj.hand_strength = [pairs(1), pairs(2)];
+                           obj.hand_rank = 2;
                        end
                    end
                end
@@ -83,18 +89,23 @@ classdef Hand
                 if six_str == 1 % Six High Straight
                     obj.hand_type = 'Six High Straight';
                     obj.extra_dice = [0 0 0 0 0];
+                    obj.hand_rank = 5;
                 elseif five_str == 1 % Five High Straight
                     obj.hand_type = 'Five High Straight';
                     obj.extra_dice = [0 0 0 0 0];
+                    obj.hand_rank = 4;
                 elseif three ~= 0 % Three-of-a-Kind
                     obj.hand_type = 'Three-of-a-Kind';
                     obj.hand_strength(1) = three;
+                    obj.hand_rank = 3;
                 elseif pairs(1) ~= 0 % Pair
                     obj.hand_type = 'Pair';
                     obj.hand_strength(1) = pairs(1);
+                    obj.hand_rank = 1;
                 else % Nothing
                     obj.hand_type = 'Nothing';
                     obj.hand_strength = obj.extra_dice;
+                    obj.hand_rank = 0;
                 end 
             end
           

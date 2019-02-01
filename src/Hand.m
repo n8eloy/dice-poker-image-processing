@@ -20,7 +20,7 @@ classdef Hand
           % Determinando qual foi a mão do jogador
             obj.hand_type = '';
             obj.hand_strength = [0 0];
-            obj.extra_dice = [0 0 0 0 0]
+            obj.extra_dice = [];
             three = 0;
             pairs = [0 0];
             five_str = 0;
@@ -88,11 +88,11 @@ classdef Hand
             if strcmp(obj.hand_type, '') % Se a mão ainda não foi determinada no loop
                 if six_str == 1 % Six High Straight
                     obj.hand_type = 'Six High Straight';
-                    obj.extra_dice = [0 0 0 0 0];
+                    obj.extra_dice = [];
                     obj.hand_rank = 5;
                 elseif five_str == 1 % Five High Straight
                     obj.hand_type = 'Five High Straight';
-                    obj.extra_dice = [0 0 0 0 0];
+                    obj.extra_dice = [];
                     obj.hand_rank = 4;
                 elseif three ~= 0 % Three-of-a-Kind
                     obj.hand_type = 'Three-of-a-Kind';

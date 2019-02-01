@@ -47,8 +47,8 @@ bw_roll2 = binarizeImg(roll_img2, 0);
 % considerando esse limiar. Para capturar corretamente os rolls 3 e 5,
 % recomendo 120 de limiar.
 
-[rotulada1, qtd_regioes1, bw_roll_eroded1, bw_roll_smaller1, bw_roll_filled1, bw_roll_final1] = isolateDices(bw_roll1, 6);
-[rotulada2, qtd_regioes2, bw_roll_eroded2, bw_roll_smaller2, bw_roll_filled2, bw_roll_final2] = isolateDices(bw_roll2, 6);
+[rotulada1, qtd_regioes1, bw_roll_eroded1, bw_roll_smaller1, bw_roll_filled1, bw_roll_final1] = isolateDices(bw_roll1, 5);
+[rotulada2, qtd_regioes2, bw_roll_eroded2, bw_roll_smaller2, bw_roll_filled2, bw_roll_final2] = isolateDices(bw_roll2, 5);
 % o segundo argumento é o raio da sphere utilizada na primeira erosão.
 % Aumente ou diminua caso não tenha o resultado esperado, normalmente será
 % um valor entre 3 e 7, dependendo do estado da imagem.
@@ -152,13 +152,34 @@ end
 % Criando o objeto Hand
 jogador2 = Hand(dice_count);
 
+% Impressão de dados extras
+if isvector(jogador1.extra_dice) && length(jogador1.extra_dice) > 1
+    extra1 = '';
+    for extra = jogador1.extra_dice
+        extra1 = [extra1 ' ' num2str(extra)];
+    end
+    %extra1 = [num2str(jogador1.extra_dice(1)) ', ' num2str(jogador1.extra_dice(2)) ', ' num2str(jogador1.extra_dice(3)) ', ' num2str(jogador1.extra_dice(4)) ', ' num2str(jogador1.extra_dice(5))];
+else
+    extra1 = 'Não há';
+end
+
+if isvector(jogador2.extra_dice) && length(jogador1.extra_dice) > 1
+    extra2 = '';
+    for extra = jogador2.extra_dice
+        extra2 = [extra2 ' ' num2str(extra)];
+    end
+    %extra2 = [num2str(jogador2.extra_dice(1)) ', ' num2str(jogador2.extra_dice(2)) ', ' num2str(jogador2.extra_dice(3)) ', ' num2str(jogador2.extra_dice(4)) ', ' num2str(jogador2.extra_dice(5))];
+else
+    extra2 = 'Não há';
+end
+
 ax = subplot(5, 4, 2);
-text(0, 0, ['Jogador 1:' char(10) 'Tipo da Mão: ' jogador1.hand_type char(10) 'Força da mão: ' num2str(jogador1.hand_strength(1)) ', ' num2str(jogador1.hand_strength(2)) char(10) 'Dados extra: ' num2str(jogador1.extra_dice(1)) ', ' num2str(jogador1.extra_dice(2)) ', ' num2str(jogador1.extra_dice(3)) ', ' num2str(jogador1.extra_dice(4)) ', ' num2str(jogador1.extra_dice(5))],...
+text(0, 0, ['Jogador 1:' newline 'Tipo da Mão: ' jogador1.hand_type newline 'Força da mão: ' num2str(jogador1.hand_strength(1)) ', ' num2str(jogador1.hand_strength(2)) newline 'Dados extra: ' extra1],...
     'FontSize', 16, 'FontWeight' , 'Bold', 'Color', 'Blue');
 set ( ax, 'visible', 'off');
 
 ax = subplot(5, 4, 3);
-text(0, 0, ['Jogador 2:' char(10) 'Tipo da Mão: ' jogador2.hand_type char(10) 'Força da mão: ' num2str(jogador2.hand_strength(1)) ', ' num2str(jogador2.hand_strength(2)) char(10) 'Dados extra: ' num2str(jogador2.extra_dice(1)) ', ' num2str(jogador2.extra_dice(2)) ', ' num2str(jogador2.extra_dice(3)) ', ' num2str(jogador2.extra_dice(4)) ', ' num2str(jogador2.extra_dice(5))],...
+text(0, 0, ['Jogador 2:' newline 'Tipo da Mão: ' jogador2.hand_type newline 'Força da mão: ' num2str(jogador2.hand_strength(1)) ', ' num2str(jogador2.hand_strength(2)) newline 'Dados extra: ' extra2],...
     'FontSize', 16, 'FontWeight' , 'Bold', 'Color', 'Red');
 set ( ax, 'visible', 'off');
 
@@ -213,3 +234,42 @@ else
     'FontSize', 16, 'FontWeight' , 'Bold', 'Color', 'Black');
     set ( ax, 'visible', 'off');
 end
+
+% Exibindo recomendação de jogadas
+if strcmp(jogador1.hand_type, 'Nothing')
+    textoJogador1 = ['Jogador 1 não tem nada! A melhor jogada seria rolar todos os dados' newline 'novamente, ou rodar um dado restante novamente para conseguir Straight (16,70%)'];
+elseif strcmp(jogador1.hand_type, 'Pair')
+    textoJogador1 = ['Jogador 1 tem One Pair. A melhor jogada seria rolar os três dados restantes' newline 'novamente para conseguir Two Pairs (27,80%), Three of a Kind (27,70%)' newline 'ou Full House (9,29%), Four-of-a-Kind (6,95%), Five-of-a-Kind (0,46%)'];
+elseif strcmp(jogador1.hand_type, 'Two Pairs')
+    textoJogador1 = ['Jogador 1 tem Two Pairs. A melhor jogada seria rolar o dado restante' newline 'novamente para conseguir Full House (33,30%)'];
+elseif strcmp(jogador1.hand_type, 'Three-of-a-Kind')
+    textoJogador1 = ['Jogador 1 tem Three-of-a-Kind. A melhor jogada seria rolar os dois dados' newline 'restantes novamente para conseguir Four-of-a-Kind (27,80%),' newline 'Full House (13,90%) ou Five-of-a-Kind (2,76%)'];
+elseif strcmp(jogador1.hand_type, 'Four-of-a-Kind')
+    textoJogador1 = ['Jogador 1 tem Four-of-a-Kind. A melhor jogada seria rolar o dado restante' newline 'novamente para conseguir Five-of-a-Kind (16,7%)'];
+else
+    textoJogador1 = 'A mão do Jogador 1 já é boa o suficiente! Qualquer jogada é perigosa';
+end
+
+if strcmp(jogador2.hand_type, 'Nothing')
+    textoJogador2 = ['Jogador 2 não tem nada! A melhor jogada seria rolar todos os dados' newline 'novamente, ou rodar um dado restante novamente para conseguir Straight (16,70%)'];
+elseif strcmp(jogador2.hand_type, 'Pair')
+    textoJogador2 = ['Jogador 2 tem One Pair. A melhor jogada seria rolar os três dados restantes' newline 'novamente para conseguir Two Pairs (27,80%), Three of a Kind (27,70%)' newline 'ou Full House (9,29%), Four-of-a-Kind (6,95%), Five-of-a-Kind (0,46%)'];
+elseif strcmp(jogador2.hand_type, 'Two Pairs')
+    textoJogador2 = ['Jogador 2 tem Two Pairs. A melhor jogada seria rolar o dado restante' newline 'novamente para conseguir Full House (33,30%)'];
+elseif strcmp(jogador2.hand_type, 'Three-of-a-Kind')
+    textoJogador2 = ['Jogador 2 tem Three-of-a-Kind. A melhor jogada seria rolar os dois dados' newline 'restantes novamente para conseguir Four-of-a-Kind (27,80%),' newline 'Full House (13,90%) ou Five-of-a-Kind (2,76%)'];
+elseif strcmp(jogador2.hand_type, 'Four-of-a-Kind')
+    textoJogador2 = ['Jogador 2 tem Four-of-a-Kind. A melhor jogada seria rolar o dado restante' newline 'novamente para conseguir Five-of-a-Kind (16,7%)'];
+else
+    textoJogador2 = 'A mão do Jogador 2 já é boa o suficiente! Qualquer jogada é perigosa';
+end
+
+ax = subplot(5, 4, 10);
+text(0, 0, textoJogador1,...
+    'FontSize', 14, 'FontWeight' , 'Bold', 'Color', 'Blue');
+set ( ax, 'visible', 'off');
+
+ax = subplot(5, 4, 14);
+text(0, 0, textoJogador2,...
+    'FontSize', 14, 'FontWeight' , 'Bold', 'Color', 'Red');
+set ( ax, 'visible', 'off');
